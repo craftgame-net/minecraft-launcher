@@ -4,11 +4,13 @@
 window.LoggerUtil = require('./assets/js/util/LoggerUtil').LoggerUtil
 
 // Bootstrap line so a support log always states what was running.
-const { app } = require('@electron/remote')
-const os = require('os')
-window.LoggerUtil.getLogger('Startup').info(
-    `${app.getName()} ${app.getVersion()} | Electron ${process.versions.electron} | Node ${process.versions.node} | ${os.type()} ${os.release()} ${process.arch}`
-)
+{
+    const { app } = require('@electron/remote')
+    const os = require('os')
+    window.LoggerUtil.getLogger('Startup').info(
+        `${app.getName()} ${app.getVersion()} | Electron ${process.versions.electron} | Node ${process.versions.node} | ${os.type()} ${os.release()} ${process.arch}`
+    )
+}
 
 // Persist uncaught failures so they end up in the on-disk launcher log.
 // In the renderer these fire as DOM events, not on `process`.
