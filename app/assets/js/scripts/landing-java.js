@@ -35,12 +35,12 @@ async function asyncSystemScan(effectiveJavaOptions, launchAfter = true){
             Lang.queryJS('landing.systemScan.installJava'),
             Lang.queryJS('landing.systemScan.installJavaManually')
         )
-        setOverlayHandler(() => {
+        setOverlayHandler(async () => {
             setLaunchDetails(Lang.queryJS('landing.systemScan.javaDownloadPrepare'))
             toggleOverlay(false)
 
             try {
-                downloadJava(effectiveJavaOptions, launchAfter)
+                await downloadJava(effectiveJavaOptions, launchAfter)
             } catch(err) {
                 loggerLanding.error('Unhandled error in Java Download', err)
                 showLaunchFailure(Lang.queryJS('landing.systemScan.javaDownloadFailureTitle'), Lang.queryJS('landing.systemScan.javaDownloadFailureText'))

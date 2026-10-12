@@ -66,7 +66,9 @@ async function downloadFile(url, path, onProgress) {
             }
             const total = Number(response.headers.get('content-length')) || 0
             let transferred = 0
-            const downloadStream = Readable.fromWeb(response.body)
+            // Readable.fromWeb brand-checks the stream and rejects Chromium's
+            // ReadableStream (renderer fetch); Readable.from works across realms.
+            const downloadStream = Readable.from(response.body, { objectMode: false })
             if (onProgress) {
                 downloadStream.on('data', (chunk) => {
                     transferred += chunk.length
