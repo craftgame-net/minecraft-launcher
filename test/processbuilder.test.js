@@ -123,3 +123,11 @@ test('constructJVMArguments builds classpath and does not mutate the manifest', 
     ctx.constructJVMArguments([], path.join(os.tmpdir(), 'cgn-launcher-pb-natives'))
     assert.strictEqual(ctx.vanillaManifest.arguments.jvm.length, before)
 })
+
+test('redactLaunchArguments masks secrets without mutating the input', () => {
+    const args = ['--username', 'u', '--accessToken', 'token', '--clientId', 'cid', '--xuid', 'x', '--version', 'v']
+    assert.deepStrictEqual(ProcessBuilder.redactLaunchArguments(args), [
+        '--username', 'u', '--accessToken', '***', '--clientId', '***', '--xuid', '***', '--version', 'v'
+    ])
+    assert.strictEqual(args[3], 'token')
+})

@@ -11,6 +11,19 @@ const ConfigManager          = require('./configmanager')
 
 const logger = LoggerUtil.getLogger('ProcessBuilder')
 
+// Flags whose following value is a secret and must never reach the log file.
+const SECRET_ARG_FLAGS = ['--accessToken', '--clientId', '--xuid']
+
+function redactLaunchArguments(args) {
+    const redacted = args.slice()
+    for (let i = 0; i < redacted.length - 1; i++) {
+        if (SECRET_ARG_FLAGS.includes(redacted[i])) {
+            redacted[i + 1] = '***'
+        }
+    }
+    return redacted
+}
+
 
 /**
  * Only forge and fabric are top level mod loaders.
@@ -69,7 +82,7 @@ class ProcessBuilder {
             args = args.concat(this.constructModList(modObj.fMods))
         }
 
-        logger.info('Launch Arguments:', args)
+        logger.info('Launch Arguments:', redactLaunchArguments(args))
 
         const child = child_process.spawn(ConfigManager.getJavaExecutable(this.server.rawServer.id), args, {
             cwd: this.gameDir,
@@ -142,3 +155,4 @@ Object.assign(
 )
 
 module.exports = ProcessBuilder
+module.exports.redactLaunchArguments = redactLaunchArguments
