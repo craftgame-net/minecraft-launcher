@@ -47,12 +47,22 @@ if (!app.requestSingleInstanceLock()) {
 // Deep link handling ('cgnml://...') built on the standard Electron APIs.
 const DEEP_LINK_PROTOCOL = 'cgnml'
 
+let protocolRegistered = false
 if (process.defaultApp) {
     if (process.argv.length >= 2) {
-        app.setAsDefaultProtocolClient(DEEP_LINK_PROTOCOL, process.execPath, [path.resolve(process.argv[1])])
+        protocolRegistered = app.setAsDefaultProtocolClient(DEEP_LINK_PROTOCOL, process.execPath, [path.resolve(process.argv[1])])
     }
 } else {
-    app.setAsDefaultProtocolClient(DEEP_LINK_PROTOCOL)
+    protocolRegistered = app.setAsDefaultProtocolClient(DEEP_LINK_PROTOCOL)
+}
+
+try {
+    LoggerUtil.getLogger('Startup').info(
+        `Deep link '${DEEP_LINK_PROTOCOL}': registered=${protocolRegistered}, isDefault=${app.isDefaultProtocolClient(DEEP_LINK_PROTOCOL)}` +
+        (process.platform === 'linux' ? `, CHROME_DESKTOP=${process.env.CHROME_DESKTOP ?? '<unset>'}` : '')
+    )
+} catch (err) {
+    console.error('Failed to resolve deep link registration status.', err)
 }
 
 let pendingDeepLink = null

@@ -48,6 +48,8 @@ linux:
     description: 'Launcher to play on CraftGame.net'
     category: 'Game'
     mimeTypes: [x-scheme-handler/cgnml]
+    # Must match package.json desktopName (Electron's CHROME_DESKTOP) or the cgnml:// registration fails on Linux.
+    syncDesktopName: true
 
 directories:
     buildResources: 'build'

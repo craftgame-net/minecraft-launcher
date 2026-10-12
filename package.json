@@ -1,7 +1,8 @@
 {
   "name": "cgn.minecraft-launcher",
-  "version": "0.15.8",
+  "version": "0.15.9",
   "productName": "CraftGame Launcher",
+  "desktopName": "craftgame-launcher.desktop",
   "description": "Minecraft launcher for craftgame.net",
   "author": "CraftGame.net",
   "license": "MIT",
