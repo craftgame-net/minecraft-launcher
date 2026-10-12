@@ -13,6 +13,12 @@ const { pathToFileURL }                 = require('url')
 const { SHELL_OPCODE, CGN_OPCODE } = require('./app/assets/js/ipcconstants')
 const LangLoader                        = require('./app/assets/js/langloader')
 const { BACKGROUND }                    = require('./app/assets/js/endpoints')
+const { LoggerUtil }                    = require('./app/assets/js/util/LoggerUtil')
+
+// Persist uncaught failures so they end up in the on-disk launcher log.
+const crashLog = LoggerUtil.getLogger('Main')
+process.on('unhandledRejection', (reason) => crashLog.error('Unhandled promise rejection', reason))
+process.on('uncaughtException', (error) => crashLog.error('Uncaught exception', error))
 
 // The app was previously named "Minecraft" (package.json productName), so the
 // user data directory (config.json, accounts) lives in %APPDATA%\Minecraft.
@@ -20,6 +26,9 @@ const { BACKGROUND }                    = require('./app/assets/js/endpoints')
 const LEGACY_APP_NAME = 'Minecraft'
 const APP_NAME = 'CraftGame Launcher'
 app.setName(APP_NAME)
+LoggerUtil.getLogger('Startup').info(
+    `${APP_NAME} ${app.getVersion()} | Electron ${process.versions.electron} | Node ${process.versions.node} | ${process.platform} ${process.arch}`
+)
 try {
     const appDataDir = app.getPath('appData')
     const legacyUserData = path.join(appDataDir, LEGACY_APP_NAME)

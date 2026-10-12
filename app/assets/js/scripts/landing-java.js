@@ -21,12 +21,15 @@ async function asyncSystemScan(effectiveJavaOptions, launchAfter = true){
     toggleLaunchArea(true)
     setLaunchPercentage(0, 100)
 
+    loggerLanding.info(`Scanning for Java ${effectiveJavaOptions.suggestedMajor} (range ${effectiveJavaOptions.supported}, distribution ${effectiveJavaOptions.distribution ?? 'auto'})`)
+
     const jvmDetails = await discoverBestJvmInstallation(
         ConfigManager.getDataDirectory(),
         effectiveJavaOptions.supported
     )
 
     if(jvmDetails == null) {
+        loggerLanding.warn('No compatible Java installation found.')
         // If the result is null, no valid Java installation was found.
         // Show this information to the user.
         setOverlayContent(
@@ -70,6 +73,7 @@ async function asyncSystemScan(effectiveJavaOptions, launchAfter = true){
         toggleOverlay(true, true)
     } else {
         // Java installation found, use this to launch the game.
+        loggerLanding.info(`Using Java ${jvmDetails.semverStr} (${jvmDetails.vendor}) at ${jvmDetails.path}`)
         const javaExec = javaExecFromRoot(jvmDetails.path)
         ConfigManager.setJavaExecutable(ConfigManager.getSelectedServer(), javaExec)
         ConfigManager.save()
@@ -101,6 +105,8 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
         throw new Error(Lang.queryJS('landing.downloadJava.findJdkFailure'))
     }
 
+    loggerLanding.info(`Downloading Java ${effectiveJavaOptions.suggestedMajor} build ${asset.id} (${asset.size} bytes) from ${asset.url}`)
+
     let received = 0
     await downloadFile(asset.url, asset.path, ({ transferred }) => {
         received = transferred
@@ -111,7 +117,7 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
     if(received !== asset.size) {
         loggerLanding.warn(`Java Download: Expected ${asset.size} bytes but received ${received}`)
         if(!await validateLocalFile(asset.path, asset.algo, asset.hash)) {
-            log.error(`Hashes do not match, ${asset.id} may be corrupted.`)
+            loggerLanding.error(`Hashes do not match, ${asset.id} may be corrupted.`)
             // Don't know how this could happen, but report it.
             throw new Error(Lang.queryJS('landing.downloadJava.javaDownloadCorruptedError'))
         }
@@ -138,6 +144,8 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
 
     // Extraction complete, remove the loading from the OS progress bar.
     remote.getCurrentWindow().setProgressBar(-1)
+
+    loggerLanding.info(`Installed Java at ${newJavaExec}`)
 
     // Extraction completed successfully.
     ConfigManager.setJavaExecutable(ConfigManager.getSelectedServer(), newJavaExec)

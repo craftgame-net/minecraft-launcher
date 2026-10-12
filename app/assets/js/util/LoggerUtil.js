@@ -1,4 +1,5 @@
 const { inspect } = require('util')
+const FileLog = require('./FileLog')
 
 const LEVELS = {
     error: 0,
@@ -64,7 +65,10 @@ class Logger {
         if (LEVELS[level] > this.threshold) {
             return
         }
-        process.stdout.write(`[${timestamp()}] [${COLORS[level]}${level}${RESET}] [${this.label}]: ${formatMessage(args)}\n`)
+        const ts = timestamp()
+        const message = formatMessage(args)
+        process.stdout.write(`[${ts}] [${COLORS[level]}${level}${RESET}] [${this.label}]: ${message}\n`)
+        FileLog.write(`[${ts}] [${level}] [${this.label}]: ${message}\n`)
     }
 
     error(...args) {
